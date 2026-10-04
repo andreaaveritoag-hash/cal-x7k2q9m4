@@ -853,7 +853,7 @@ var BIG=false;
 
 /* ---------- Estado ---------- */
 var KEY="calendario-pre-cirugia-v2";
-var S={start:"2026-10-05",surg:"2027-01-25",time:"doc",safe:true,ankle:false,eq:eqPreset("common"),done:{},loads:{},cur:{},pain:{},notes:{},skip:{},hist:{},chk:{},eff:{},meas:[],fs:0,todo:null,pz:{},pt:{},hurt:{},hl:{},xs:{},exn:{},plim:4,reps:{},rl:{},ses:{},dur:{},fx:[],inj:{fx:"",doc:"",tel:""},wake:false,pzs:{},nop:false,soft:{},dt:"day",unit:"kg",autoRest:true,restSec:"auto",inv:{mancuernas:"",kettlebells:""},w:1,d:1,month:0};
+var S={hk:0,start:"2026-10-05",surg:"2027-01-25",time:"doc",safe:true,ankle:false,eq:eqPreset("common"),done:{},loads:{},cur:{},pain:{},notes:{},skip:{},hist:{},chk:{},eff:{},meas:[],fs:0,todo:null,pz:{},pt:{},hurt:{},hl:{},xs:{},exn:{},plim:4,reps:{},rl:{},ses:{},dur:{},fx:[],inj:{fx:"",doc:"",tel:""},wake:false,pzs:{},nop:false,soft:{},dt:"day",unit:"kg",autoRest:true,restSec:"auto",inv:{mancuernas:"",kettlebells:""},w:1,d:1,month:0};
 try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);for(var k in o){if(k==="eq"){for(var j in o.eq){if(j in S.eq)S.eq[j]=!!o.eq[j];}}else if(k in S)S[k]=o[k];}}}catch(e){}
 var cloud=null,cloudBusy=false,cloudDirty=false,cloudT=null;
 function snapState(){return JSON.stringify(S);}
@@ -1429,7 +1429,7 @@ function renderDetail(){
   if(day.ex.length){
     tb+='<details class="menu"><summary class="btn">Opciones</summary><div class="menu-i">';
     if(!st.skip&&!S.soft[kd])tb+='<button type="button" class="btn" data-soft="1">Modo suave</button>';
-    tb+='<button type="button" class="btn" data-pdf="1">PDF del día</button><button type="button" class="btn" data-nop="1">'+(S.nop?"Mostrar fotos":"Ocultar fotos")+'</button></div></details>';
+    tb+='<button type="button" class="btn" data-hk="go">Guardar en Apple Salud</button><button type="button" class="btn" data-hk="tog">'+(S.hk?"Abrir Salud al terminar: sí":"Abrir Salud al terminar: no")+'</button><button type="button" class="btn" data-pdf="1">PDF del día</button><button type="button" class="btn" data-nop="1">'+(S.nop?"Mostrar fotos":"Ocultar fotos")+'</button></div></details>';
   }
   tb+='<button type="button" class="btn bigbtn" data-big="1">'+(BIG?"Cerrar pantalla grande":"Pantalla grande")+'</button></div>';
   var ring='<div class="dring" style="--p:'+pct(st.done,st.tot)+'" role="img" aria-label="Avance del día"><b>'+pct(st.done,st.tot)+'%</b></div>';
@@ -1701,6 +1701,7 @@ function tickSes(){
   var k=dayKey(S.w,S.d),t0=S.ses[k];if(!t0){el.textContent="";if(e2)e2.textContent="";return;}
   var sec=Math.floor((Date.now()-t0)/1000),m=Math.floor(sec/60),r=sec%60;el.textContent="("+m+":"+(r<10?"0":"")+r+")";var e2=document.getElementById("sesEl2");if(e2)e2.textContent="⏱ "+m+":"+(r<10?"0":"")+r;
 }
+function openHealth(){try{location.href="shortcuts://run-shortcut?name="+encodeURIComponent("Log Workout");}catch(e){toast("No pude abrir Atajos desde aquí. Abre la app en tu iPhone.");}}
 function autoStartSes(){
   var k=dayKey(S.w,S.d);if(S.ses[k]||S.skip[k])return;
   if(!getDay(S.w,S.d).ex.length)return;
@@ -1928,7 +1929,9 @@ document.addEventListener("click",function(ev){
   if(t.dataset.nop){S.nop=!S.nop;save();renderDetail();return;}
   if(t.dataset.pdf){makePdf();return;}
   if(t.dataset.nav){moveDay(+t.dataset.nav);return;}
-  if(t.dataset.ses){var sk0=dayKey(S.w,S.d);if(t.dataset.ses==="start")S.ses[sk0]=Date.now();else endSession(sk0);save();renderDetail();return;}
+  if(t.dataset.hk==="go"){openHealth();return;}
+  if(t.dataset.hk==="tog"){S.hk=S.hk?0:1;save();renderDetail();toast(S.hk?"Al terminar la sesión se abrirá tu atajo de Apple Salud.":"Ya no se abrirá solo.");return;}
+  if(t.dataset.ses){var sk0=dayKey(S.w,S.d);if(t.dataset.ses==="start")S.ses[sk0]=Date.now();else{endSession(sk0);if(S.hk)setTimeout(openHealth,300);}save();renderDetail();return;}
   if(t.dataset.dt){S.dt=t.dataset.dt;save();showPane();if(S.dt==="prog")renderProg();if(!BIG){var dd=$("detail");if(dd&&dd.getBoundingClientRect().top<0)dd.scrollIntoView({block:"start"});}return;}
   if(t.dataset.soft){var sf=S.w+"."+S.d;if(S.soft[sf])delete S.soft[sf];else S.soft[sf]=1;invalidate();save();renderAll();return;}
   if(t.dataset.goto){var gp=t.dataset.goto.split(".");S.w=+gp[0];S.d=+gp[1];S.month=Math.floor((S.w-1)/4);S.dt="day";save();renderAll();return;}
