@@ -1429,7 +1429,7 @@ function renderDetail(){
   if(day.ex.length){
     tb+='<details class="menu"><summary class="btn">Opciones</summary><div class="menu-i">';
     if(!st.skip&&!S.soft[kd])tb+='<button type="button" class="btn" data-soft="1">Modo suave</button>';
-    tb+='<button type="button" class="btn" data-hk="go">Guardar en Apple Salud</button><button type="button" class="btn" data-hk="tog">'+(S.hk?"Abrir Salud al terminar: sí":"Abrir Salud al terminar: no")+'</button><button type="button" class="btn" data-pdf="1">PDF del día</button><button type="button" class="btn" data-nop="1">'+(S.nop?"Mostrar fotos":"Ocultar fotos")+'</button></div></details>';
+    tb+='<button type="button" class="btn" data-hk="go">Guardar en Apple Salud</button><button type="button" class="btn" data-pdf="1">PDF del día</button><button type="button" class="btn" data-nop="1">'+(S.nop?"Mostrar fotos":"Ocultar fotos")+'</button></div></details>';
   }
   tb+='<button type="button" class="btn bigbtn" data-big="1">'+(BIG?"Cerrar pantalla grande":"Pantalla grande")+'</button></div>';
   var ring='<div class="dring" style="--p:'+pct(st.done,st.tot)+'" role="img" aria-label="Avance del día"><b>'+pct(st.done,st.tot)+'%</b></div>';
@@ -1930,8 +1930,7 @@ document.addEventListener("click",function(ev){
   if(t.dataset.pdf){makePdf();return;}
   if(t.dataset.nav){moveDay(+t.dataset.nav);return;}
   if(t.dataset.hk==="go"){openHealth();return;}
-  if(t.dataset.hk==="tog"){S.hk=S.hk?0:1;save();renderDetail();toast(S.hk?"Al terminar la sesión se abrirá tu atajo de Apple Salud.":"Ya no se abrirá solo.");return;}
-  if(t.dataset.ses){var sk0=dayKey(S.w,S.d);if(t.dataset.ses==="start")S.ses[sk0]=Date.now();else{endSession(sk0);if(S.hk)setTimeout(openHealth,300);}save();renderDetail();return;}
+    if(t.dataset.ses){var sk0=dayKey(S.w,S.d);if(t.dataset.ses==="start")S.ses[sk0]=Date.now();else{endSession(sk0);setTimeout(openHealth,300);}save();renderDetail();return;}
   if(t.dataset.dt){S.dt=t.dataset.dt;save();showPane();if(S.dt==="prog")renderProg();if(!BIG){var dd=$("detail");if(dd&&dd.getBoundingClientRect().top<0)dd.scrollIntoView({block:"start"});}return;}
   if(t.dataset.soft){var sf=S.w+"."+S.d;if(S.soft[sf])delete S.soft[sf];else S.soft[sf]=1;invalidate();save();renderAll();return;}
   if(t.dataset.goto){var gp=t.dataset.goto.split(".");S.w=+gp[0];S.d=+gp[1];S.month=Math.floor((S.w-1)/4);S.dt="day";save();renderAll();return;}
@@ -1977,7 +1976,7 @@ document.addEventListener("click",function(ev){
   else if(act==="reset"){list.forEach(function(e){delete S.done[key(w,d,e.k)];});}
   var ak=dayKey(S.w,S.d),ast=stats(S.w,S.d);
   if(!S.ses[ak]&&ast.done>0&&ast.done<ast.tot)S.ses[ak]=S.dur[ak]?Date.now()-S.dur[ak]*60000:Date.now()-60000;
-  if(S.ses[ak]&&ast.tot&&ast.done>=ast.tot)endSession(ak);
+  if(S.ses[ak]&&ast.tot&&ast.done>=ast.tot){endSession(ak);setTimeout(openHealth,400);}
   var wasFull=false;try{var ex1=list[+t.dataset.i];wasFull=!!ex1&&(act==="set"||act==="all")&&(S.done[key(w,d,ex1.k)]||0)>=ex1.s;}catch(er){}
   save();renderAll();tickSes();
   if(wasFull){setTimeout(function(){var nl=document.querySelector("#exList li.now");if(nl)goLi(nl);},80);}
