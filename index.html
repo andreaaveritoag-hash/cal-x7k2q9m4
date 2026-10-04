@@ -350,6 +350,16 @@ details.settings>.controls{border:0;border-radius:0;padding:4px 0 12px;margin:0}
 .dtabs button{flex:1;min-width:70px;min-height:40px;border:1.5px solid var(--quiet);background:transparent;color:var(--quiet);border-radius:15.7px;font:inherit;font-weight:700;font-size:17px}
 .dtabs button.on{background:var(--quiet);color:var(--onink)}
 .pane[hidden]{display:none!important}
+.dtabs{flex-wrap:nowrap!important;gap:4px!important;padding:6px 0!important;margin:6px 0 8px!important;top:0!important;z-index:30!important;background:var(--bg)!important;box-shadow:0 2px 0 var(--bg)}
+.dtabs button{min-width:0!important;flex:1 1 0!important;min-height:38px!important;font-size:14px!important;padding:0 4px!important;white-space:nowrap}
+.dtabs .bigbtn{flex:0 0 auto!important;padding:0 10px!important}
+body:not(.big) .dtabs{position:fixed!important;top:0!important;left:0;right:0;margin:0!important;padding:8px max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left))!important;padding-top:max(8px,env(safe-area-inset-top))!important;border-bottom:2px solid var(--line);box-shadow:none!important;z-index:35!important}
+body:not(.big){padding-top:calc(58px + env(safe-area-inset-top))}
+body:not(.big) .detail{scroll-margin-top:64px}
+body.big .dtabs{position:sticky!important}
+body.big .detail{padding-top:0!important}
+body.big .dtabs{padding-top:14px!important;z-index:45!important}
+
 .topt{flex-basis:100%}.topt summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--quiet);padding:4px 0}
 #tPill{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:10px;background:var(--quiet);color:var(--onink);border-radius:999px;padding:8px 8px 8px 18px;font-size:22px;font-variant-numeric:tabular-nums;box-shadow:none}
 #tPill button{border:0;border-radius:999px;background:var(--bg);color:var(--quiet);font:inherit;font-size:16px;font-weight:700;padding:6px 14px;min-height:36px}
@@ -508,7 +518,7 @@ body.big details.mo{margin-left:0}
         <button type="button" role="tab" data-dt="prog">Progreso</button>
         <button type="button" role="tab" data-dt="health">Salud</button>
         <button type="button" role="tab" data-dt="more">Más</button>
-        <button type="button" class="bigbtn" id="bigBtn" data-big="1">Pantalla grande</button>
+        <button type="button" class="bigbtn" id="bigBtn" data-big="1">Ampliar</button>
       </div>
       <div class="pane" id="pane-day">
         <div id="dayHead"></div>
@@ -1678,7 +1688,7 @@ function nextLi(){
 function goLi(el){try{el.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){el.scrollIntoView();}}
 function setBig(v){
   BIG=!!v;document.body.classList.toggle("big",BIG);
-  var b=$("bigBtn");if(b){b.textContent=BIG?"Cerrar pantalla grande":"Pantalla grande";b.classList.toggle("on",BIG);}
+  var b=$("bigBtn");if(b){b.textContent=BIG?"Cerrar":"Ampliar";b.classList.toggle("on",BIG);}
   var dd0=$("detail");if(dd0)dd0.scrollTop=0;
   showPane();renderDetail();if(S.dt==="prog")renderProg();
 }
@@ -1878,7 +1888,7 @@ document.addEventListener("click",function(ev){
   if(t.dataset.pdf){makePdf();return;}
   if(t.dataset.nav){moveDay(+t.dataset.nav);return;}
   if(t.dataset.ses){var sk0=dayKey(S.w,S.d);if(t.dataset.ses==="start")S.ses[sk0]=Date.now();else endSession(sk0);save();renderDetail();return;}
-  if(t.dataset.dt){S.dt=t.dataset.dt;save();showPane();if(S.dt==="prog")renderProg();return;}
+  if(t.dataset.dt){S.dt=t.dataset.dt;save();showPane();if(S.dt==="prog")renderProg();if(!BIG){var dd=$("detail");if(dd&&dd.getBoundingClientRect().top<0)dd.scrollIntoView({block:"start"});}return;}
   if(t.dataset.soft){var sf=S.w+"."+S.d;if(S.soft[sf])delete S.soft[sf];else S.soft[sf]=1;invalidate();save();renderAll();return;}
   if(t.dataset.goto){var gp=t.dataset.goto.split(".");S.w=+gp[0];S.d=+gp[1];S.month=Math.floor((S.w-1)/4);S.dt="day";save();renderAll();return;}
   if(t.id==="nextBtn"){var nl=nextLi();if(nl){goLi(nl);nl.classList.add("flash");setTimeout(function(){nl.classList.remove("flash");},1600);}return;}
